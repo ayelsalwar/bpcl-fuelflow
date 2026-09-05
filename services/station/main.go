@@ -66,7 +66,9 @@ func (s *stationServer) DeductFuel(ctx context.Context, req *pb.DeductFuelReques
 		}, nil
 	}
 
+	fmt.Println(currentStock, req.Amount)
 	newStock := currentStock - req.Amount
+	fmt.Println(currentStock, req.Amount)
 	if err := s.redisClient.Set(ctx, key, newStock, 0).Err(); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update stock")
 	}
