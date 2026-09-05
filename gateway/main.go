@@ -123,7 +123,7 @@ func main() {
 		c.JSON(http.StatusOK, res)
 	})
 
-	router.GET("/inventory/:station_id", func(c *gin.Context) {
+	router.GET("/inventory/station/:station_id", func(c *gin.Context) {
 		req := &pbStation.GetInventoryRequest{StationId: c.Param("station_id")}
 		res, err := stationClient.GetInventory(c.Request.Context(), req)
 		if err != nil {
