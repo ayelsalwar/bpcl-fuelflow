@@ -1,0 +1,30 @@
+syntax = "proto3";
+ 
+package station;
+option go_package = "./proto/stationpb";
+ 
+service StationService {
+  rpc GetInventory (GetInventoryRequest) returns (GetInventoryResponse);
+  rpc DeductFuel (DeductFuelRequest) returns (DeductFuelResponse);
+}
+ 
+message GetInventoryRequest {
+  string station_id = 1;
+}
+ 
+message GetInventoryResponse {
+  string station_id = 1;
+  map<string, float> fuel_stock = 2; // e.g., "petrol": 5000.5, "diesel": 8000.0
+}
+ 
+message DeductFuelRequest {
+  string station_id = 1;
+  string fuel_type = 2;
+  float amount = 3;
+}
+ 
+message DeductFuelResponse {
+  bool success = 1;
+  string message = 2;
+}
+ 
