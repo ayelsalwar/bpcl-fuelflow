@@ -106,6 +106,10 @@ func main() {
 	router := gin.Default()
 
 	// --- PUBLIC ROUTES ---
+	router.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "UP"})
+	})
+
 	router.POST("/register", func(c *gin.Context) {
 		var req pbAuth.RegisterRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
