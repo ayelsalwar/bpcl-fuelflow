@@ -15,7 +15,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 // auth middleware
@@ -175,6 +177,13 @@ func main() {
 
 			res, err := orderClient.PlaceOrder(c.Request.Context(), &req)
 			if err != nil {
+				st, ok := status.FromError(err)
+				// Handle specific gRPC error codes
+				if ok && st.Code() == codes.FailedPrecondition {
+					c.JSON(http.StatusConflict, gin.H{"error": st.Message()})
+					return
+				}
+				// general error handling
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
