@@ -3,6 +3,7 @@ module bpcl-fuelflow/services/station
 go 1.26.5
 
 require (
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.22.0
 	google.golang.org/grpc v1.83.2
