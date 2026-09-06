@@ -4,5 +4,6 @@ use (
 	./gateway
 	./proto
 	./services/auth
+	./services/order
 	./services/station
 )

@@ -1,0 +1,21 @@
+syntax = "proto3";
+ 
+package order;
+option go_package = "./proto/orderpb";
+ 
+service OrderService {
+  rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+}
+ 
+message PlaceOrderRequest {
+  string user_id = 1;
+  string station_id = 2;
+  string fuel_type = 3;
+  float amount = 4;
+}
+ 
+message PlaceOrderResponse {
+  string order_id = 1;
+  string status = 2;
+  string message = 3;
+}

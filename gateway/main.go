@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	pbAuth "bpcl-fuelflow/proto/authpb"
+	pbOrder "bpcl-fuelflow/proto/orderpb"
 	pbStation "bpcl-fuelflow/proto/stationpb"
 
 	"github.com/gin-gonic/gin"
@@ -92,6 +93,14 @@ func main() {
 	defer stationConn.Close()
 	stationClient := pbStation.NewStationServiceClient(stationConn)
 
+	// order service
+	orderConn, err := grpc.NewClient("localhost:"+os.Getenv("ORDER_SERVICE_PORT"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Did not connect to Order service: %v", err)
+	}
+	defer orderConn.Close()
+	orderClient := pbOrder.NewOrderServiceClient(orderConn)
+
 	router := gin.Default()
 
 	// --- PUBLIC ROUTES ---
@@ -134,16 +143,37 @@ func main() {
 	})
 
 	// --- PROTECTED ROUTES ---
-	secureGroup := router.Group("/inventory")
-	secureGroup.Use(AuthMiddleware("manager", "admin"))
+	inventoryGroup := router.Group("/inventory")
+	inventoryGroup.Use(AuthMiddleware("manager", "admin"))
 	{
-		secureGroup.POST("/deduct", func(c *gin.Context) {
+		inventoryGroup.POST("/deduct", func(c *gin.Context) {
 			var req pbStation.DeductFuelRequest
 			if err := c.ShouldBindJSON(&req); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 				return
 			}
 			res, err := stationClient.DeductFuel(c.Request.Context(), &req)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, res)
+		})
+	}
+
+	orderGroup := router.Group("/order")
+	orderGroup.Use(AuthMiddleware()) // Empty args allow any authenticated user
+	{
+		orderGroup.POST("/", func(c *gin.Context) {
+			var req pbOrder.PlaceOrderRequest
+			if err := c.ShouldBindJSON(&req); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+				return
+			}
+			// Securely attach the UserID from the verified JWT token
+			req.UserId = c.GetString("user_id")
+
+			res, err := orderClient.PlaceOrder(c.Request.Context(), &req)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
