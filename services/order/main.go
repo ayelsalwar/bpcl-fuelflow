@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	pbNotification "bpcl-fuelflow/proto/notificationpb"
 	pbOrder "bpcl-fuelflow/proto/orderpb"
 	pbStation "bpcl-fuelflow/proto/stationpb"
 
@@ -33,8 +34,9 @@ type Order struct {
 
 type orderServer struct {
 	pbOrder.UnimplementedOrderServiceServer
-	db            *gorm.DB
-	stationClient pbStation.StationServiceClient
+	db                 *gorm.DB
+	stationClient      pbStation.StationServiceClient
+	notificationClient pbNotification.NotificationServiceClient
 }
 
 func (s *orderServer) PlaceOrder(ctx context.Context, req *pbOrder.PlaceOrderRequest) (*pbOrder.PlaceOrderResponse, error) {
@@ -65,6 +67,18 @@ func (s *orderServer) PlaceOrder(ctx context.Context, req *pbOrder.PlaceOrderReq
 	if result := s.db.Create(&order); result.Error != nil {
 		return nil, status.Errorf(codes.Internal, "fuel deducted but failed to save order record")
 	}
+
+	// notify the user asynchronously
+	go func() {
+		_, err := s.notificationClient.SendNotification(context.Background(), &pbNotification.SendNotificationRequest{
+			OrderId: order.ID,
+			UserId:  order.UserID,
+			Message: fmt.Sprintf("Successfully deducted %.2f %s", order.Amount, order.FuelType),
+		})
+		if err != nil {
+			log.Printf("Failed to send notification for Order ID %s: %v", order.ID, err)
+		}
+	}()
 
 	return &pbOrder.PlaceOrderResponse{
 		OrderId: order.ID,
@@ -98,6 +112,14 @@ func main() {
 	defer stationConn.Close()
 	stationClient := pbStation.NewStationServiceClient(stationConn)
 
+	// Connect to Notification Service
+	notificationConn, err := grpc.NewClient("localhost:"+os.Getenv("NOTIFICATION_SERVICE_PORT"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Failed to connect to Notification service: %v", err)
+	}
+	defer notificationConn.Close()
+	notificationClient := pbNotification.NewNotificationServiceClient(notificationConn)
+
 	// Start the Order gRPC Server
 	port := os.Getenv("ORDER_SERVICE_PORT")
 	lis, err := net.Listen("tcp", ":"+port)
@@ -107,8 +129,9 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pbOrder.RegisterOrderServiceServer(grpcServer, &orderServer{
-		db:            db,
-		stationClient: stationClient,
+		db:                 db,
+		stationClient:      stationClient,
+		notificationClient: notificationClient,
 	})
 
 	log.Printf("Order Service running on port %s...", port)
