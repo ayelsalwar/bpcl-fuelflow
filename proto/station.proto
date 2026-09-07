@@ -6,6 +6,8 @@ option go_package = "./proto/stationpb";
 service StationService {
   rpc GetInventory (GetInventoryRequest) returns (GetInventoryResponse);
   rpc DeductFuel (DeductFuelRequest) returns (DeductFuelResponse);
+  rpc ListStations (ListStationsRequest) returns (ListStationsResponse);
+  rpc ReplenishFuel (ReplenishFuelRequest) returns (ReplenishFuelResponse);
 }
  
 message GetInventoryRequest {
@@ -28,3 +30,19 @@ message DeductFuelResponse {
   string message = 2;
 }
  
+message ListStationsRequest {}
+
+message ListStationsResponse {
+  repeated string station_ids = 1;
+}
+
+message ReplenishFuelRequest {
+  string station_id = 1;
+  string fuel_type = 2;
+  float amount = 3;
+}
+
+message ReplenishFuelResponse {
+  bool success = 1;
+  string message = 2;
+}

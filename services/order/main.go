@@ -87,6 +87,27 @@ func (s *orderServer) PlaceOrder(ctx context.Context, req *pbOrder.PlaceOrderReq
 	}, nil
 }
 
+func (s *orderServer) GetOrder(ctx context.Context, req *pbOrder.GetOrderRequest) (*pbOrder.GetOrderResponse, error) {
+	var order Order
+	if result := s.db.First(&order, "id = ?", req.OrderId); result.Error != nil {
+		return nil, status.Errorf(codes.NotFound, "order not found")
+	}
+	// only order owner or admin can access the order details
+
+	if order.UserID != req.UserId && req.Role != "admin" && req.Role != "manager" {
+		return nil, status.Errorf(codes.PermissionDenied, "you do not have permission to access this order")
+	}
+
+	return &pbOrder.GetOrderResponse{
+		OrderId:   order.ID,
+		UserId:    order.UserID,
+		StationId: order.StationID,
+		FuelType:  order.FuelType,
+		Amount:    order.Amount,
+		Status:    order.Status,
+	}, nil
+}
+
 func main() {
 	if err := godotenv.Load("../../.env"); err != nil {
 		log.Println("No .env file found")

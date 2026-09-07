@@ -5,6 +5,7 @@ option go_package = "./proto/orderpb";
  
 service OrderService {
   rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+  rpc GetOrder (GetOrderRequest) returns (GetOrderResponse);
 }
  
 message PlaceOrderRequest {
@@ -19,3 +20,19 @@ message PlaceOrderResponse {
   string status = 2;
   string message = 3;
 }
+
+message GetOrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string role = 3;
+}
+
+message GetOrderResponse {
+  string order_id = 1;
+  string user_id = 2;
+  string station_id = 3;
+  string fuel_type = 4;
+  float amount = 5;
+  string status = 6; // e.g., "pending", "completed", "failed"
+}
+

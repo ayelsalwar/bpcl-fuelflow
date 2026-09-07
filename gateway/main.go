@@ -105,12 +105,16 @@ func main() {
 
 	router := gin.Default()
 
-	// --- PUBLIC ROUTES ---
-	router.GET("/healthz", func(c *gin.Context) {
+	// --- GLOBAL PUBLIC ROUTES ---
+	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "UP"})
 	})
 
-	router.POST("/register", func(c *gin.Context) {
+	// --- API ROUTE GROUPS ---
+	api := router.Group("/api")
+
+	// 1. PUBLIC API ROUTES
+	api.POST("/auth/register", func(c *gin.Context) {
 		var req pbAuth.RegisterRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
@@ -124,7 +128,7 @@ func main() {
 		c.JSON(http.StatusCreated, res)
 	})
 
-	router.POST("/login", func(c *gin.Context) {
+	api.POST("/auth/login", func(c *gin.Context) {
 		var req pbAuth.LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
@@ -138,39 +142,30 @@ func main() {
 		c.JSON(http.StatusOK, res)
 	})
 
-	router.GET("/inventory/station/:station_id", func(c *gin.Context) {
-		req := &pbStation.GetInventoryRequest{StationId: c.Param("station_id")}
-		res, err := stationClient.GetInventory(c.Request.Context(), req)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, res)
-	})
-
-	// --- PROTECTED ROUTES ---
-	inventoryGroup := router.Group("/inventory")
-	inventoryGroup.Use(AuthMiddleware("manager", "admin"))
+	// 2. PROTECTED ROUTES (Requires any valid JWT)
+	protected := api.Group("")
+	protected.Use(AuthMiddleware())
 	{
-		inventoryGroup.POST("/deduct", func(c *gin.Context) {
-			var req pbStation.DeductFuelRequest
-			if err := c.ShouldBindJSON(&req); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-				return
-			}
-			res, err := stationClient.DeductFuel(c.Request.Context(), &req)
+		protected.GET("/stations", func(c *gin.Context) {
+			res, err := stationClient.ListStations(c.Request.Context(), &pbStation.ListStationsRequest{})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			c.JSON(http.StatusOK, res)
 		})
-	}
 
-	orderGroup := router.Group("/order")
-	orderGroup.Use(AuthMiddleware()) // Empty args allow any authenticated user
-	{
-		orderGroup.POST("/", func(c *gin.Context) {
+		protected.GET("/stations/:station_id", func(c *gin.Context) {
+			req := &pbStation.GetInventoryRequest{StationId: c.Param("station_id")}
+			res, err := stationClient.GetInventory(c.Request.Context(), req)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, res)
+		})
+
+		protected.POST("/orders", func(c *gin.Context) {
 			var req pbOrder.PlaceOrderRequest
 			if err := c.ShouldBindJSON(&req); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
@@ -182,12 +177,54 @@ func main() {
 			res, err := orderClient.PlaceOrder(c.Request.Context(), &req)
 			if err != nil {
 				st, ok := status.FromError(err)
-				// Handle specific gRPC error codes
+				// Handle specific gRPC error codes (e.g., Not enough stock)
 				if ok && st.Code() == codes.FailedPrecondition {
 					c.JSON(http.StatusConflict, gin.H{"error": st.Message()})
 					return
 				}
-				// general error handling
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, res)
+		})
+
+		protected.GET("/orders/:order_id", func(c *gin.Context) {
+			req := &pbOrder.GetOrderRequest{
+				OrderId: c.Param("order_id"),
+				UserId:  c.GetString("user_id"),
+				Role:    c.GetString("role"),
+			}
+			res, err := orderClient.GetOrder(c.Request.Context(), req)
+			if err != nil {
+				st, ok := status.FromError(err)
+				if ok && st.Code() == codes.PermissionDenied {
+					c.JSON(http.StatusForbidden, gin.H{"error": st.Message()})
+					return
+				}
+				if ok && st.Code() == codes.NotFound {
+					c.JSON(http.StatusNotFound, gin.H{"error": st.Message()})
+					return
+				}
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, res)
+		})
+	}
+
+	// 3. MANAGER ROUTES (Requires Admin or Manager JWT)
+	managerGroup := api.Group("")
+	managerGroup.Use(AuthMiddleware("manager", "admin"))
+	{
+		managerGroup.POST("/stations/:station_id/inventory", func(c *gin.Context) {
+			var req pbStation.ReplenishFuelRequest
+			if err := c.ShouldBindJSON(&req); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+				return
+			}
+			req.StationId = c.Param("station_id")
+			res, err := stationClient.ReplenishFuel(c.Request.Context(), &req)
+			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}

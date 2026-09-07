@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"sync"
 
 	pb "bpcl-fuelflow/proto/stationpb"
@@ -76,6 +77,51 @@ func (s *stationServer) DeductFuel(ctx context.Context, req *pb.DeductFuelReques
 	return &pb.DeductFuelResponse{
 		Success: true,
 		Message: fmt.Sprintf("Deducted %.2f. Remaining: %.2f", req.Amount, newStock),
+	}, nil
+}
+
+func (s *stationServer) ListStations(ctx context.Context, req *pb.ListStationsRequest) (*pb.ListStationsResponse, error) {
+	keys, err := s.redisClient.Keys(ctx, "station:*:petrol").Result() // petrol is anchor
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch stations")
+	}
+
+	var stations []string
+	for _, key := range keys {
+		parts := strings.Split(key, ":")
+		if len(parts) >= 2 {
+			stations = append(stations, parts[1]) // Extract station ID
+		}
+	}
+
+	return &pb.ListStationsResponse{
+		StationIds: stations,
+	}, nil
+}
+
+func (s *stationServer) ReplenishFuel(ctx context.Context, req *pb.ReplenishFuelRequest) (*pb.ReplenishFuelResponse, error) {
+	s.mu.Lock()         // Lock the process
+	defer s.mu.Unlock() // Unlock automatically when function finishes
+
+	redisKey := fmt.Sprintf("station:%s:%s", req.StationId, req.FuelType)
+
+	currentStockStr, err := s.redisClient.Get(ctx, redisKey).Result()
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "fuel stock not found or initialized")
+	}
+
+	var currentStock float32
+	fmt.Sscanf(currentStockStr, "%f", &currentStock) // Parsing
+	newStock := currentStock + req.Amount
+	err = s.redisClient.Set(ctx, redisKey, newStock, 0).Err() // Update stock
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update stock")
+	}
+
+	return &pb.ReplenishFuelResponse{
+		Success: true,
+		Message: fmt.Sprintf("Added %.2f. New stock: %.2f", req.Amount, newStock),
 	}, nil
 }
 

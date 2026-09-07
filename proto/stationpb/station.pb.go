@@ -229,6 +229,198 @@ func (x *DeductFuelResponse) GetMessage() string {
 	return ""
 }
 
+type ListStationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListStationsRequest) Reset() {
+	*x = ListStationsRequest{}
+	mi := &file_proto_station_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListStationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListStationsRequest) ProtoMessage() {}
+
+func (x *ListStationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_station_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListStationsRequest.ProtoReflect.Descriptor instead.
+func (*ListStationsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_station_proto_rawDescGZIP(), []int{4}
+}
+
+type ListStationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StationIds    []string               `protobuf:"bytes,1,rep,name=station_ids,json=stationIds,proto3" json:"station_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListStationsResponse) Reset() {
+	*x = ListStationsResponse{}
+	mi := &file_proto_station_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListStationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListStationsResponse) ProtoMessage() {}
+
+func (x *ListStationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_station_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListStationsResponse.ProtoReflect.Descriptor instead.
+func (*ListStationsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_station_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListStationsResponse) GetStationIds() []string {
+	if x != nil {
+		return x.StationIds
+	}
+	return nil
+}
+
+type ReplenishFuelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StationId     string                 `protobuf:"bytes,1,opt,name=station_id,json=stationId,proto3" json:"station_id,omitempty"`
+	FuelType      string                 `protobuf:"bytes,2,opt,name=fuel_type,json=fuelType,proto3" json:"fuel_type,omitempty"`
+	Amount        float32                `protobuf:"fixed32,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplenishFuelRequest) Reset() {
+	*x = ReplenishFuelRequest{}
+	mi := &file_proto_station_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplenishFuelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplenishFuelRequest) ProtoMessage() {}
+
+func (x *ReplenishFuelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_station_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplenishFuelRequest.ProtoReflect.Descriptor instead.
+func (*ReplenishFuelRequest) Descriptor() ([]byte, []int) {
+	return file_proto_station_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ReplenishFuelRequest) GetStationId() string {
+	if x != nil {
+		return x.StationId
+	}
+	return ""
+}
+
+func (x *ReplenishFuelRequest) GetFuelType() string {
+	if x != nil {
+		return x.FuelType
+	}
+	return ""
+}
+
+func (x *ReplenishFuelRequest) GetAmount() float32 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type ReplenishFuelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplenishFuelResponse) Reset() {
+	*x = ReplenishFuelResponse{}
+	mi := &file_proto_station_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplenishFuelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplenishFuelResponse) ProtoMessage() {}
+
+func (x *ReplenishFuelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_station_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplenishFuelResponse.ProtoReflect.Descriptor instead.
+func (*ReplenishFuelResponse) Descriptor() ([]byte, []int) {
+	return file_proto_station_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ReplenishFuelResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ReplenishFuelResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_proto_station_proto protoreflect.FileDescriptor
 
 const file_proto_station_proto_rawDesc = "" +
@@ -252,11 +444,25 @@ const file_proto_station_proto_rawDesc = "" +
 	"\x06amount\x18\x03 \x01(\x02R\x06amount\"H\n" +
 	"\x12DeductFuelResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xa4\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x15\n" +
+	"\x13ListStationsRequest\"7\n" +
+	"\x14ListStationsResponse\x12\x1f\n" +
+	"\vstation_ids\x18\x01 \x03(\tR\n" +
+	"stationIds\"j\n" +
+	"\x14ReplenishFuelRequest\x12\x1d\n" +
+	"\n" +
+	"station_id\x18\x01 \x01(\tR\tstationId\x12\x1b\n" +
+	"\tfuel_type\x18\x02 \x01(\tR\bfuelType\x12\x16\n" +
+	"\x06amount\x18\x03 \x01(\x02R\x06amount\"K\n" +
+	"\x15ReplenishFuelResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xc1\x02\n" +
 	"\x0eStationService\x12K\n" +
 	"\fGetInventory\x12\x1c.station.GetInventoryRequest\x1a\x1d.station.GetInventoryResponse\x12E\n" +
 	"\n" +
-	"DeductFuel\x12\x1a.station.DeductFuelRequest\x1a\x1b.station.DeductFuelResponseB\x13Z\x11./proto/stationpbb\x06proto3"
+	"DeductFuel\x12\x1a.station.DeductFuelRequest\x1a\x1b.station.DeductFuelResponse\x12K\n" +
+	"\fListStations\x12\x1c.station.ListStationsRequest\x1a\x1d.station.ListStationsResponse\x12N\n" +
+	"\rReplenishFuel\x12\x1d.station.ReplenishFuelRequest\x1a\x1e.station.ReplenishFuelResponseB\x13Z\x11./proto/stationpbb\x06proto3"
 
 var (
 	file_proto_station_proto_rawDescOnce sync.Once
@@ -270,22 +476,30 @@ func file_proto_station_proto_rawDescGZIP() []byte {
 	return file_proto_station_proto_rawDescData
 }
 
-var file_proto_station_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_station_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_proto_station_proto_goTypes = []any{
-	(*GetInventoryRequest)(nil),  // 0: station.GetInventoryRequest
-	(*GetInventoryResponse)(nil), // 1: station.GetInventoryResponse
-	(*DeductFuelRequest)(nil),    // 2: station.DeductFuelRequest
-	(*DeductFuelResponse)(nil),   // 3: station.DeductFuelResponse
-	nil,                          // 4: station.GetInventoryResponse.FuelStockEntry
+	(*GetInventoryRequest)(nil),   // 0: station.GetInventoryRequest
+	(*GetInventoryResponse)(nil),  // 1: station.GetInventoryResponse
+	(*DeductFuelRequest)(nil),     // 2: station.DeductFuelRequest
+	(*DeductFuelResponse)(nil),    // 3: station.DeductFuelResponse
+	(*ListStationsRequest)(nil),   // 4: station.ListStationsRequest
+	(*ListStationsResponse)(nil),  // 5: station.ListStationsResponse
+	(*ReplenishFuelRequest)(nil),  // 6: station.ReplenishFuelRequest
+	(*ReplenishFuelResponse)(nil), // 7: station.ReplenishFuelResponse
+	nil,                           // 8: station.GetInventoryResponse.FuelStockEntry
 }
 var file_proto_station_proto_depIdxs = []int32{
-	4, // 0: station.GetInventoryResponse.fuel_stock:type_name -> station.GetInventoryResponse.FuelStockEntry
+	8, // 0: station.GetInventoryResponse.fuel_stock:type_name -> station.GetInventoryResponse.FuelStockEntry
 	0, // 1: station.StationService.GetInventory:input_type -> station.GetInventoryRequest
 	2, // 2: station.StationService.DeductFuel:input_type -> station.DeductFuelRequest
-	1, // 3: station.StationService.GetInventory:output_type -> station.GetInventoryResponse
-	3, // 4: station.StationService.DeductFuel:output_type -> station.DeductFuelResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
+	4, // 3: station.StationService.ListStations:input_type -> station.ListStationsRequest
+	6, // 4: station.StationService.ReplenishFuel:input_type -> station.ReplenishFuelRequest
+	1, // 5: station.StationService.GetInventory:output_type -> station.GetInventoryResponse
+	3, // 6: station.StationService.DeductFuel:output_type -> station.DeductFuelResponse
+	5, // 7: station.StationService.ListStations:output_type -> station.ListStationsResponse
+	7, // 8: station.StationService.ReplenishFuel:output_type -> station.ReplenishFuelResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -302,7 +516,7 @@ func file_proto_station_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_station_proto_rawDesc), len(file_proto_station_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

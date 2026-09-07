@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	StationService_GetInventory_FullMethodName = "/station.StationService/GetInventory"
-	StationService_DeductFuel_FullMethodName   = "/station.StationService/DeductFuel"
+	StationService_GetInventory_FullMethodName  = "/station.StationService/GetInventory"
+	StationService_DeductFuel_FullMethodName    = "/station.StationService/DeductFuel"
+	StationService_ListStations_FullMethodName  = "/station.StationService/ListStations"
+	StationService_ReplenishFuel_FullMethodName = "/station.StationService/ReplenishFuel"
 )
 
 // StationServiceClient is the client API for StationService service.
@@ -29,6 +31,8 @@ const (
 type StationServiceClient interface {
 	GetInventory(ctx context.Context, in *GetInventoryRequest, opts ...grpc.CallOption) (*GetInventoryResponse, error)
 	DeductFuel(ctx context.Context, in *DeductFuelRequest, opts ...grpc.CallOption) (*DeductFuelResponse, error)
+	ListStations(ctx context.Context, in *ListStationsRequest, opts ...grpc.CallOption) (*ListStationsResponse, error)
+	ReplenishFuel(ctx context.Context, in *ReplenishFuelRequest, opts ...grpc.CallOption) (*ReplenishFuelResponse, error)
 }
 
 type stationServiceClient struct {
@@ -59,12 +63,34 @@ func (c *stationServiceClient) DeductFuel(ctx context.Context, in *DeductFuelReq
 	return out, nil
 }
 
+func (c *stationServiceClient) ListStations(ctx context.Context, in *ListStationsRequest, opts ...grpc.CallOption) (*ListStationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListStationsResponse)
+	err := c.cc.Invoke(ctx, StationService_ListStations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stationServiceClient) ReplenishFuel(ctx context.Context, in *ReplenishFuelRequest, opts ...grpc.CallOption) (*ReplenishFuelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReplenishFuelResponse)
+	err := c.cc.Invoke(ctx, StationService_ReplenishFuel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StationServiceServer is the server API for StationService service.
 // All implementations must embed UnimplementedStationServiceServer
 // for forward compatibility.
 type StationServiceServer interface {
 	GetInventory(context.Context, *GetInventoryRequest) (*GetInventoryResponse, error)
 	DeductFuel(context.Context, *DeductFuelRequest) (*DeductFuelResponse, error)
+	ListStations(context.Context, *ListStationsRequest) (*ListStationsResponse, error)
+	ReplenishFuel(context.Context, *ReplenishFuelRequest) (*ReplenishFuelResponse, error)
 	mustEmbedUnimplementedStationServiceServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedStationServiceServer) GetInventory(context.Context, *GetInven
 }
 func (UnimplementedStationServiceServer) DeductFuel(context.Context, *DeductFuelRequest) (*DeductFuelResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeductFuel not implemented")
+}
+func (UnimplementedStationServiceServer) ListStations(context.Context, *ListStationsRequest) (*ListStationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListStations not implemented")
+}
+func (UnimplementedStationServiceServer) ReplenishFuel(context.Context, *ReplenishFuelRequest) (*ReplenishFuelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplenishFuel not implemented")
 }
 func (UnimplementedStationServiceServer) mustEmbedUnimplementedStationServiceServer() {}
 func (UnimplementedStationServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +170,42 @@ func _StationService_DeductFuel_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StationService_ListStations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StationServiceServer).ListStations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StationService_ListStations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StationServiceServer).ListStations(ctx, req.(*ListStationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StationService_ReplenishFuel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplenishFuelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StationServiceServer).ReplenishFuel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StationService_ReplenishFuel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StationServiceServer).ReplenishFuel(ctx, req.(*ReplenishFuelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StationService_ServiceDesc is the grpc.ServiceDesc for StationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var StationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeductFuel",
 			Handler:    _StationService_DeductFuel_Handler,
+		},
+		{
+			MethodName: "ListStations",
+			Handler:    _StationService_ListStations_Handler,
+		},
+		{
+			MethodName: "ReplenishFuel",
+			Handler:    _StationService_ReplenishFuel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
